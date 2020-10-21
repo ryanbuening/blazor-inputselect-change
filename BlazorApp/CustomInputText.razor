@@ -1,0 +1,13 @@
+﻿@inherits InputBase<string>
+@using System.Linq.Expressions
+
+<input @attributes="@AdditionalAttributes" class="form-control @CssClass" @bind="@CurrentValueAsString" @bind:event="oninput" />
+
+@code {
+	protected override bool TryParseValueFromString(string value, out string result, out string validationErrorMessage)
+	{
+		result = value;
+		validationErrorMessage = null;
+		return true;
+	}
+}

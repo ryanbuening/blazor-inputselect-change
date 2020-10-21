@@ -1,7 +1,70 @@
 ﻿@page "/"
+@using BlazorApp
 
-<h1>Hello, world!</h1>
+<EditForm EditContext="@editContext">
+	<!-- OnInputChange DOES get called -->
+	TextValue:
+	<CustomInputText @bind-Value="model.TextValue"
+					 @onchange="OnInputChange" />
+	<br />
+	<!-- OnSelectChange does NOT get called -->
+	SelectValue:
+	<CustomInputSelect @bind-Value="model.SelectValue"
+					   @onchange="OnSelectChange"
+					   Options="Options" />
+	<br />
+	<!-- OnSelectExpressionChange DOES get called -->
+	SelectExpressionValue:
+	<CustomInputSelect Value="model.SelectExpressionValue"
+					   ValueExpression="@(()=> model.SelectExpressionValue)"
+					   ValueChanged="@((string s) => OnSelectExpressionChange(s))"
+					   Options="Options" />
+</EditForm>
 
-Welcome to your new app.
+@code {
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+	private List<Option> Options;
+	private EditContext editContext;
+	private Model model = new Model() { };
+
+	protected override async Task OnInitializedAsync()
+	{
+		editContext = new EditContext(model);
+
+		Options = new List<Option>
+{
+			new Option { Text="Value A", Value="A" },
+			new Option { Text="Value B", Value="B" }
+		};
+	}
+
+	void OnInputChange()
+	{
+		Console.WriteLine("OnInputChange ran");
+		Console.WriteLine("model.TextValue = " + model.TextValue);
+	}
+
+	void OnSelectChange()
+	{
+		// Why can't this work the same as an input?
+		Console.WriteLine("OnSelectChange ran");
+		Console.WriteLine("model.SelectValue is " + model.SelectValue);
+	}
+
+	void OnSelectExpressionChange(string s)
+	{
+		Console.WriteLine("OnSelectExpressionChange(string s) ran");
+		// SelectExpressionValue still hasn't been set
+		Console.WriteLine("model.SelectExpressionValue is " + model.SelectExpressionValue);
+		// Now we are required to set the property value
+		model.SelectExpressionValue = s;
+		Console.WriteLine("model.SelectExpressionValue is " + model.SelectExpressionValue);
+	}
+
+	class Model
+	{
+		public string TextValue = "";
+		public string SelectValue = "";
+		public string SelectExpressionValue = "";
+	}
+}

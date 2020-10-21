@@ -1,0 +1,36 @@
+﻿@using System.Linq.Expressions
+@using System.Globalization;
+
+@typeparam T
+@inherits InputBase<T>
+
+<select class="form-control @CssClass" @bind="CurrentValueAsString">
+	@if (ShowDefaultOption)
+	{
+		<option value=""></option>
+	}
+	@ChildContent
+	@foreach (var option in Options)
+	{
+		<option value="@option.Value">@option.Text</option>
+	}
+</select>
+
+@code {
+	[Parameter] public RenderFragment ChildContent { get; set; }
+	[Parameter] public bool ShowDefaultOption { get; set; } = true;
+	[Parameter] public List<Option> Options { get; set; }
+
+	protected override bool TryParseValueFromString(string value, out T result, out string validationErrorMessage)
+	{
+		if (typeof(T) == typeof(string))
+		{
+			result = (T)(object)value;
+			validationErrorMessage = null;
+
+			return true;
+		}
+
+		throw new InvalidOperationException($"{GetType()} does not support the type '{typeof(T)}'.");
+	}
+}
