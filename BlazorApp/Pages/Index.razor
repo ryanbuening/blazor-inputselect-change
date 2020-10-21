@@ -1,38 +1,67 @@
 ﻿@page "/"
-@using BlazorApp
 
 <EditForm EditContext="@editContext">
-	<!-- OnInputChange DOES get called -->
+	<!-- OnInputChange DOES get called, works as expected -->
 	TextValue:
 	<CustomInputText @bind-Value="model.TextValue"
 					 @onchange="OnInputChange" />
+
 	<br />
+
 	<!-- OnSelectChange does NOT get called -->
 	SelectValue:
 	<CustomInputSelect @bind-Value="model.SelectValue"
 					   @onchange="OnSelectChange"
 					   Options="Options" />
+
 	<br />
-	<!-- OnSelectExpressionChange DOES get called -->
+
+	<!-- OnSelectExpressionChange DOES get called, required to pass value -->
 	SelectExpressionValue:
 	<CustomInputSelect Value="model.SelectExpressionValue"
 					   ValueExpression="@(()=> model.SelectExpressionValue)"
 					   ValueChanged="@((string s) => OnSelectExpressionChange(s))"
 					   Options="Options" />
+
+	<br />
+
+	<!-- OnSelectOnInputChange DOES get called, required to pass value -->
+	SelectOnInputChange
+	<InputSelect @bind-Value="model.SelectOnInputValue" @oninput="OnSelectOnInputChange" class="form-control">
+		<option value=""></option>
+		<option value="A">Value A</option>
+		<option value="B">Value B</option>
+	</InputSelect>
+
+	<br />
+
+	<!-- OnSelectOnInputChange does NOT get called -->
+	CustomSelectOnInputChange
+	<CustomInputSelect @bind-Value="model.CustomSelectOnInputValue"
+					   @oninput="OnSelectOnInputChange"
+					   Options="Options" />
 </EditForm>
 
 @code {
-
 	private List<Option> Options;
 	private EditContext editContext;
 	private Model model = new Model() { };
+
+	class Model
+	{
+		public string TextValue = "";
+		public string SelectValue = "";
+		public string SelectExpressionValue = "";
+		public string SelectOnInputValue = "";
+		public string CustomSelectOnInputValue = "";
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
 		editContext = new EditContext(model);
 
 		Options = new List<Option>
-{
+		{
 			new Option { Text="Value A", Value="A" },
 			new Option { Text="Value B", Value="B" }
 		};
@@ -46,7 +75,7 @@
 
 	void OnSelectChange()
 	{
-		// Why can't this work the same as an input?
+		// Why can't this get called the same as an input control?
 		Console.WriteLine("OnSelectChange ran");
 		Console.WriteLine("model.SelectValue is " + model.SelectValue);
 	}
@@ -54,17 +83,27 @@
 	void OnSelectExpressionChange(string s)
 	{
 		Console.WriteLine("OnSelectExpressionChange(string s) ran");
-		// SelectExpressionValue still hasn't been set
 		Console.WriteLine("model.SelectExpressionValue is " + model.SelectExpressionValue);
 		// Now we are required to set the property value
 		model.SelectExpressionValue = s;
 		Console.WriteLine("model.SelectExpressionValue is " + model.SelectExpressionValue);
 	}
 
-	class Model
+	void OnSelectOnInputChange(ChangeEventArgs var)
 	{
-		public string TextValue = "";
-		public string SelectValue = "";
-		public string SelectExpressionValue = "";
+		Console.WriteLine("OnSelectOnInputChange ran");
+		Console.WriteLine("model.SelectOnInputValue is " + model.SelectOnInputValue);
+		// Now we are required to set the property value
+		model.SelectOnInputValue = var.Value.ToString();
+		Console.WriteLine("model.SelectOnInputValue is " + model.SelectOnInputValue);
+	}
+
+	void OnCustomSelectOnInputChange(ChangeEventArgs var)
+	{
+		Console.WriteLine("OnCustomSelectOnInputChange ran");
+		Console.WriteLine("model.CustomSelectOnInputValue is " + model.CustomSelectOnInputValue);
+		// Now we are required to set the property value
+		model.CustomSelectOnInputValue = var.Value.ToString();
+		Console.WriteLine("model.CustomSelectOnInputValue is " + model.CustomSelectOnInputValue);
 	}
 }
